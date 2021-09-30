@@ -36,36 +36,7 @@ class RedisUtils {
         call_user_func($this->lineHandler, $message);
     }
     
-    
-    public function analyze(): void {
-        $databases = $this->getDatabases();
-        $this->line('Redis databases info');
-        $this->printTable(
-            [
-                'db' => 'DB №',
-                'keys' => 'Keys total',
-                'expires' => 'Keys expires',
-                'avg_ttl' => 'Avg. TTL',
-            ],
-            $databases
-        );
-        $report = $this->analyzeDatabases();
-        $this->line('Redis keys analysis per database');
-        $this->printTable(
-            [
-                'db' => 'DB №',
-                'count' => 'Keys total',
-                'active' => 'Keys active',
-                'expired' => 'Keys expired',
-                'neverExpire' => 'Keys w/o expiration',
-                'size' => 'DB size',
-                'avgTtl' => 'Avg. TTL',
-            ],
-            $report
-        );
-    }
-    
-    private function getDatabases(): array {
+    public function getDatabases(): array {
         $keyspace = $this->redis->info('keyspace');
         $databases = [];
         foreach ($keyspace['Keyspace'] as $db => $keysInfo) {
@@ -76,7 +47,7 @@ class RedisUtils {
         return $databases;
     }
     
-    private function analyzeDatabases(): array {
+    public function analyzeDatabases(): array {
         $databases = array_keys($this->getDatabases());
         $report = [];
         foreach ($databases as $db) {
@@ -130,7 +101,7 @@ class RedisUtils {
         return $report;
     }
     
-    protected function printTable(array $headers, array $rows): void {
+    public function printTable(array $headers, array $rows): void {
         $separator = ' | ';
         $prefix = '| ';
         $suffix = ' |';
