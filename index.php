@@ -6,8 +6,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $utils = new RedisUtils\RedisUtils();
 
-$this->line('Redis databases info');
-$this->printTable(
+$utils->line('Redis databases info');
+$utils->printTable(
     [
         'db' => 'DB №',
         'keys' => 'Keys total',
@@ -17,8 +17,8 @@ $this->printTable(
     $utils->getDatabases()
 );
 
-$this->line('Redis keys analysis per database');
-$this->printTable(
+$utils->line('Redis keys analysis per database');
+$utils->printTable(
     [
         'db' => 'DB №',
         'count' => 'Keys total',

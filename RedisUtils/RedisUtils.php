@@ -32,7 +32,7 @@ class RedisUtils {
         $this->lineHandler = $line;
     }
     
-    protected function line(string $message): void {
+    public function line(string $message): void {
         call_user_func($this->lineHandler, $message);
     }
     
