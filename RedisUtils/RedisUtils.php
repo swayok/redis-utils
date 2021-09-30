@@ -4,6 +4,8 @@ namespace RedisUtils;
 
 use Predis\Client;
 use Predis\Collection\Iterator\Keyspace;
+use Predis\Response\Status;
+use Redis;
 
 class RedisUtils {
     
@@ -47,8 +49,8 @@ class RedisUtils {
         return $databases;
     }
     
-    public function analyzeDatabases(): array {
-        $databases = array_keys($this->getDatabases());
+    public function analyzeDatabases(?int $onlyOneDb = null): array {
+        $databases = $onlyOneDb ? [$onlyOneDb] : array_keys($this->getDatabases());
         $report = [];
         foreach ($databases as $db) {
             if (!$this->redis->select($db)) {
@@ -57,7 +59,7 @@ class RedisUtils {
             }
             
             $report[$db] = [
-                'db' => $db, //total count
+                'db' => $db,
                 'count' => 0, //total count
                 'size' => 0, //total size
                 'neverExpire' => 0, //the count of never expired keys
@@ -99,6 +101,50 @@ class RedisUtils {
             $report[$db]['avgTtl'] = round($report[$db]['avgTtl']);
         }
         return $report;
+    }
+    
+    public function analyzeDatabase(int $db): array {
+        if (!$this->redis->select($db)) {
+            $this->line('DB failed to be selected: ' . $db);
+            return [];
+        }
+    
+        $keys = new Keyspace($this->redis, null, $this->limitPerIteration);
+        foreach ($keys as $key) {
+            /** @var Status $type */
+            $type = $this->redis->type($key);
+            $report[$key] = [
+                'key' => $key,
+                'size' => '?',
+                'ttl' => $this->redis->ttl($key),
+                'type' => $type->getPayload(),
+                'count' => '-'
+            ];
+            switch ($report[$key]['type']) {
+                case 'list':
+                    $report[$key]['count'] = $this->redis->llen($key);
+                    break;
+                case 'hash':
+                    $report[$key]['count'] = $this->redis->hlen($key);
+                    break;
+            }
+            $debug = $this->redis->executeRaw(['debug', 'object', $key]);
+            if ($debug) {
+                $debug = explode(' ', $debug);
+                $lens = explode(':', $debug[4]);
+                $report[$key]['size'] = $lens[1];//approximate memory usage by serializedlength
+                if ($report[$key]['size'] > 1024 * 100) {
+                    $report[$key]['size'] = round($report[$key]['size'] / 1024 / 1024, 2) . ' Mb';
+                } else {
+                    $report[$key]['size'] = round($report[$key]['size'] / 1024, 2) . ' Kb';
+                }
+            }
+        }
+        return $report;
+    }
+    
+    public function decodeRedisType(int $type) {
+    
     }
     
     public function printTable(array $headers, array $rows): void {

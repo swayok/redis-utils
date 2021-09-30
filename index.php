@@ -30,3 +30,15 @@ $utils->printTable(
     ],
     $utils->analyzeDatabases()
 );
+
+$utils->line('Redis keys analysis for database');
+$utils->printTable(
+    [
+        'key' => 'Key',
+        'type' => 'Type',
+        'ttl' => 'TTL',
+        'size' => 'Size',
+        'count' => 'Items count',
+    ],
+    $utils->analyzeDatabase(4)
+);
