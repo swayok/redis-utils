@@ -2,8 +2,6 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-
-
 $utils = new RedisUtils\RedisUtils();
 
 $utils->line('Redis databases info');
@@ -17,7 +15,8 @@ $utils->printTable(
     $utils->getDatabases()
 );
 
-$utils->line('Redis keys analysis per database');
+$db = isset($argv[1]) ? (int)$argv[1] : 0;
+$utils->line('Redis database #' . $db . ' analysis');
 $utils->printTable(
     [
         'db' => 'DB №',
@@ -28,17 +27,5 @@ $utils->printTable(
         'size' => 'DB size',
         'avgTtl' => 'Avg. TTL',
     ],
-    $utils->analyzeDatabases()
-);
-
-$utils->line('Redis keys analysis for database');
-$utils->printTable(
-    [
-        'key' => 'Key',
-        'type' => 'Type',
-        'ttl' => 'TTL',
-        'size' => 'Size',
-        'count' => 'Items count',
-    ],
-    $utils->analyzeDatabase(4)
+    $utils->analyzeDatabases($db)
 );
