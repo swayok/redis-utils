@@ -1,0 +1,22 @@
+{
+    "name": "sway/redis-utils",
+    "description": "Utils for Redis databases analysis and maintenance",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Filippov",
+            "email": "swayalex2@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.2.5|^8.0|^8.0",
+        "predis/predis": "^v1.1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "RedisUtils\\": "RedisUtils/"
+        }
+    }
+}
